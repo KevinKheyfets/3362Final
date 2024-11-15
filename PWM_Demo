@@ -1,0 +1,40 @@
+;-------------------------------------------------------------------------------
+            .cdecls C,LIST,"msp430.h"       ; Include device header file
+;-------------------------------------------------------------------------------
+            .def    RESET                   ; Export program entry-point to
+                                            ; make it known to linker.
+;-------------------------------------------------------------------------------
+            .global _main
+            .global __STACK_END
+            .sect   .stack                  ; Make stack linker segment ?known?
+
+            .text                           ; Assemble to Flash memory
+            .retain                         ; Ensure current section gets linked
+            .retainrefs
+
+_main
+RESET       mov.w   #__STACK_END,SP         ; Initialize stackpointer
+StopWDT     mov.w   #WDTPW+WDTHOLD,&WDTCTL  ; Stop WDT
+
+; Configure P3.6 as output for TB0.2 (PWM)
+SetupLED    bis.b   #BIT6, &P3DIR           ; Set P3.6 as output
+
+SetupPin3_6 bic.b   #BIT6, &P3SEL0          ; Select TB0.2 function for P3.6
+            bis.b   #BIT6, &P3SEL1          ; Clear P3SEL1 to finalize TB0.2 function
+
+UnlockGPIO  bic.w   #LOCKLPM5, &PM5CTL0     ; Unlock GPIO settings
+
+; Set up Timer_B0 for PWM on TB0.2 (P3.6)
+SetupTB0	mov.w   #TBSSEL__SMCLK + MC__CONTINUOUS + ID_3, &TB0CTL   ; SMCLK, up mode, /8
+			mov.w   #OUTMOD_6, &TB0CCTL2                             ; Set output mode to reset/set for TB0.2
+			mov.w   #32768, &TB0CCR2                                ; Set CCR2 for 50% duty cycle
+
+            nop
+            jmp     $                       ; loop
+            nop
+;------------------------------------------------------------------------------
+;           Interrupt Vectors
+;------------------------------------------------------------------------------
+            .sect   ".reset"                ; MSP430 RESET Vector
+            .short  RESET
+            .end
