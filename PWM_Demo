@@ -25,8 +25,8 @@ SetupPin3_6 bic.b   #BIT6, &P3SEL0          ; Select TB0.2 function for P3.6
 UnlockGPIO  bic.w   #LOCKLPM5, &PM5CTL0     ; Unlock GPIO settings
 
 ; Set up Timer_B0 for PWM on TB0.2 (P3.6)
-SetupTB0	mov.w   #TBSSEL__SMCLK + MC__CONTINUOUS + ID_3, &TB0CTL   ; SMCLK, up mode, /8
-			mov.w   #OUTMOD_6, &TB0CCTL2                             ; Set output mode to reset/set for TB0.2
+SetupTB0	mov.w   #TBSSEL__SMCLK + MC__CONTINUOUS + ID_3, &TB0CTL   ; SMCLK, CONTINUOUS mode, /8
+			mov.w   #OUTMOD_6, &TB0CCTL2                             ; Set output mode to Toggle/Set for TB0.2
 			mov.w   #32768, &TB0CCR2                                ; Set CCR2 for 50% duty cycle
 
             nop
